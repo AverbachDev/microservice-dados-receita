@@ -94,6 +94,8 @@ func ProcessCSVNaturezaJuridica() {
 		log.Fatal(err)
 	}
 
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE natureza_juridica;")
 	for _, e := range entries {
 		if strings.Index(e.Name(), "NATJUCSV") > 0 {
 			handleCSVNaturezaJuridica(e.Name())
@@ -133,7 +135,7 @@ func handleCSVNaturezaJuridica(fileName string) {
 
 	reader = nil
 	db := dbService.GetDBConnection()
-	db.Exec("TRUNCATE natureza_juridica;")
+
 	db.Table("natureza_juridica").CreateInBatches(naturezajuridicaList, 10000)
 	defer clearListNatureza(naturezajuridicaList)
 

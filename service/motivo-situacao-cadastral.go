@@ -94,6 +94,8 @@ func ProcessCSVMotivoSituacaoCadastral() {
 		log.Fatal(err)
 	}
 
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE motivo_situacao_cadastral;")
 	for _, e := range entries {
 		if strings.Index(e.Name(), "MOTICSV") > 0 {
 			handleCSVMotivoSituacaoCadastral(e.Name())
@@ -133,7 +135,7 @@ func handleCSVMotivoSituacaoCadastral(fileName string) {
 
 	reader = nil
 	db := dbService.GetDBConnection()
-	db.Exec("TRUNCATE motivo_situacao_cadastral;")
+
 	db.Table("motivo_situacao_cadastral").CreateInBatches(motivosituacaocadastralList, 10000)
 	defer clearListMotivo(motivosituacaocadastralList)
 

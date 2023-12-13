@@ -94,6 +94,8 @@ func ProcessCSVQualificacaoSocio() {
 		log.Fatal(err)
 	}
 
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE qualificacao_socio;")
 	for _, e := range entries {
 		if strings.Index(e.Name(), "QUALSCSV") > 0 {
 			handleCSVQualificacaoSocio(e.Name())
@@ -133,7 +135,7 @@ func handleCSVQualificacaoSocio(fileName string) {
 
 	reader = nil
 	db := dbService.GetDBConnection()
-	db.Exec("TRUNCATE qualificacao_socio;")
+
 	db.Table("qualificacao_socio").CreateInBatches(qualificacaosocioList, 10000)
 	defer clearListQuali(qualificacaosocioList)
 

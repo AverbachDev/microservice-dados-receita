@@ -103,13 +103,14 @@ func ProcessCSVSocio() {
 		log.Fatal(err)
 	}
 
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE socio;")
 	for _, e := range entries {
 		if strings.Index(e.Name(), "SOCIOCSV") > 0 {
 			handleCSVSocio(e.Name())
 		}
 	}
 
-	db := dbService.GetDBConnection()
 	db.Exec("OPTIMIZE TABLE socio;")
 }
 
@@ -157,7 +158,7 @@ func handleCSVSocio(fileName string) {
 
 	reader = nil
 	db := dbService.GetDBConnection()
-	db.Exec("TRUNCATE socio;")
+
 	db.Table("socio").CreateInBatches(socioList, 5000)
 
 	defer clearListSocio(socioList)

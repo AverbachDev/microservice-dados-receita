@@ -100,12 +100,14 @@ func ProcessCSVOptanteSimples() {
 		log.Fatal(err)
 	}
 
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE optante_simples;")
 	for _, e := range entries {
 		if strings.Index(e.Name(), "SIMPLES") > 0 {
 			handleCSVOptanteSimples(e.Name())
 		}
 	}
-	db := dbService.GetDBConnection()
+
 	db.Exec("OPTIMIZE TABLE optante_simples;")
 }
 
@@ -133,7 +135,6 @@ func handleCSVOptanteSimples(fileName string) {
 	loopTimes := len(records) / chunk
 
 	db := dbService.GetDBConnection()
-	db.Exec("TRUNCATE optante_simples;")
 
 	for i := 0; i < loopTimes; i++ {
 		initialPositionSlice := 0

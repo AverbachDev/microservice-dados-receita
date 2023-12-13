@@ -94,6 +94,9 @@ func ProcessCSVMunicipio() {
 		log.Fatal(err)
 	}
 
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE municipio;")
+
 	for _, e := range entries {
 		if strings.Index(e.Name(), "MUNICCSV") > 0 {
 			handleCSVMunicipio(e.Name())
@@ -133,7 +136,6 @@ func handleCSVMunicipio(fileName string) {
 
 	reader = nil
 	db := dbService.GetDBConnection()
-	db.Exec("TRUNCATE municipio;")
 	db.Table("municipio").CreateInBatches(municipioList, 10000)
 	defer clearListMunicipio(municipioList)
 

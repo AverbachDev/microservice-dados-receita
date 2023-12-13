@@ -98,13 +98,14 @@ func ProcessCSVEmpresa() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE empresa;")
 	for _, e := range entries {
 		if strings.Index(e.Name(), "EMPRECSV") > 0 {
 			handleCSVEmpresa(e.Name())
 		}
 	}
-	db := dbService.GetDBConnection()
+
 	db.Exec("OPTIMIZE TABLE empresa;")
 }
 
@@ -150,7 +151,6 @@ func handleCSVEmpresa(fileName string) {
 
 	reader = nil
 	db := dbService.GetDBConnection()
-	db.Exec("TRUNCATE empresa;")
 	db.Table("empresa").CreateInBatches(empresaList, 10000)
 	defer clearListEmpresa(empresaList)
 }

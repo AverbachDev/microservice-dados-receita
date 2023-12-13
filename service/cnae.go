@@ -94,6 +94,8 @@ func ProcessCSVCnae() {
 		log.Fatal(err)
 	}
 
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE cnae;")
 	for _, e := range entries {
 		if strings.Index(e.Name(), "CNAECSV") > 0 {
 			handleCSV(e.Name())
@@ -133,7 +135,7 @@ func handleCSV(fileName string) {
 
 	reader = nil
 	db := dbService.GetDBConnection()
-	db.Exec("TRUNCATE cnae;")
+
 	db.Table("cnae").CreateInBatches(cnaeList, 10000)
 
 	defer clearListCnae(cnaeList)

@@ -94,6 +94,8 @@ func ProcessCSVPais() {
 		log.Fatal(err)
 	}
 
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE pais;")
 	for _, e := range entries {
 		if strings.Index(e.Name(), "PAISCSV") > 0 {
 			handleCSVPais(e.Name())
@@ -134,7 +136,6 @@ func handleCSVPais(fileName string) {
 	reader = nil
 	db := dbService.GetDBConnection()
 
-	db.Exec("TRUNCATE pais;")
 	db.Table("pais").CreateInBatches(paisList, 10000)
 
 	defer clearListPais(paisList)
