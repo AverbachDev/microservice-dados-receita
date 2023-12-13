@@ -65,7 +65,7 @@ func stepsImport() {
 	service.ProcessCSVNaturezaJuridica()
 	service.ProcessCSVPais()
 	service.ProcessCSVQualificacaoSocio()
-	//service.ProcessCSVEmpresa()
+	go service.ProcessCSVEmpresa()
 	service.ProcessCSVSocio()
 	service.ProcessCSVEstabelecimento()
 	service.ProcessCSVOptanteSimples()
