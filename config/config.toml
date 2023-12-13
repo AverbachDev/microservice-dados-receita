@@ -1,0 +1,11 @@
+[SERVICE]
+port="6013"
+debug=true
+
+[DATABASE]
+server="192.168.0.110"
+username="sa"
+password="aver203"
+port="3306"
+schema="cnpj"
+connection_max=50
