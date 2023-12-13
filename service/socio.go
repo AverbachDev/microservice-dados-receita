@@ -159,7 +159,7 @@ func handleCSVSocio(fileName string) {
 	reader = nil
 	db := dbService.GetDBConnection()
 
-	db.Table("socio").CreateInBatches(socioList, 2000)
+	db.Table("socio").CreateInBatches(socioList, 1000)
 
 	defer clearListSocio(socioList)
 
