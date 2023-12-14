@@ -8,6 +8,7 @@ import (
 	"github.com/AverbachDev/microservice-dados-receita/config"
 	"github.com/AverbachDev/microservice-dados-receita/service"
 	"github.com/robfig/cron/v3"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 
 	"google.golang.org/grpc"
 
@@ -28,7 +29,11 @@ func Start() {
 	}
 
 	db.InitMysql()
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+	)
+
 	dadosReceitaPb.RegisterDadosReceitaServiceServer(grpcServer, &dadosReceitaServer{})
 
 	log.Printf("start gRPC server on %s port", config.GetYamlValues().ServerConfig.Port)

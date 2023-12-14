@@ -1,0 +1,19 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  microservice-dados-receita:
+    image: ghcr.io/averbachdev/microservice-dados-receita-producao:latest
+    container_name: microservice-dados-receita
+    restart: always
+    volumes:
+      - /home/averbach/volumes-docker/go/microservice-dados-receita/data/:/go/src/data
+      - ./config.toml.homolog:/go/src/config/config.toml
+    ports:
+      - "6013:6013"
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+    networks:
+      - microservice
+networks:
+  microservice:
+    name: backend-sga
+    external: true

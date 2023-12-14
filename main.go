@@ -5,7 +5,6 @@ import (
 
 	"github.com/AverbachDev/microservice-dados-receita/config"
 	"github.com/AverbachDev/microservice-dados-receita/server"
-	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
 	"strings"
@@ -18,17 +17,12 @@ import (
 
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 func main() {
 
 	cleanup := initTracer()
 	defer cleanup(context.Background())
-
-	r := gin.Default()
-	r.Use(otelgin.Middleware(serviceName))
 
 	server.Start()
 

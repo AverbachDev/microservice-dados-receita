@@ -1,0 +1,11 @@
+[SERVICE]
+port="6013"
+debug=false
+
+[DATABASE]
+server="192.168.0.109"
+username="averbach"
+password="p4ssw@rd4vb!"
+port="3306"
+schema="cnpj"
+connection_max=100

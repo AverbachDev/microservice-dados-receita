@@ -1,5 +1,3 @@
 data/download/
 data/output-extract/
-backup/
-tokens/
-.env
+config/config.toml

@@ -1,0 +1,15 @@
+name: publish
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'deploy.txt'
+
+jobs:
+  publish-docker-image:
+    runs-on: ubuntu-latest
+    
+    steps:
+    
+      - run: |
+           curl --request POST "https://github.averbachcobrancas.com.br/" --header "Content-Type: application/json" --header "microservice-name: microservice-relatorio" --data '{"dockercompose-name": "docker-compose.yml"}' --verbose
