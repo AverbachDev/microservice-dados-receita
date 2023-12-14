@@ -50,3 +50,23 @@ func (s *dadosReceitaServer) CreateEmpresa(ctx context.Context, req *dadosReceit
 		Error:   "",
 	}, err
 }
+
+func (s *dadosReceitaServer) ListCnpjEmpresa(ctx context.Context, req *dadosReceitaPb.ListCriteriaRequestCnpjEmpresa) (*dadosReceitaPb.ServiceResponseListCnpjEmpresa, error) {
+	result, status, err := service.ListCnpjEmpresa(req)
+
+	if err != nil {
+		return &dadosReceitaPb.ServiceResponseListCnpjEmpresa{
+			Status:  status,
+			Message: err.Error(),
+			Data:    nil,
+			Error:   err.Error(),
+		}, err
+	}
+
+	return &dadosReceitaPb.ServiceResponseListCnpjEmpresa{
+		Status:  status,
+		Message: "",
+		Data:    result,
+		Error:   "",
+	}, err
+}

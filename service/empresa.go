@@ -64,6 +64,37 @@ func CreateEmpresa(data *dadosReceitaPb.EmpresaData) error {
 
 }
 
+func ListCnpjEmpresa(data *dadosReceitaPb.ListCriteriaRequestCnpjEmpresa) (*dadosReceitaPb.ListResultCnpjEmpresaData, int32, error) {
+	var record []entity.CNPJEmpresa
+	var result *dadosReceitaPb.ListResultCnpjEmpresaData
+	db := dbService.GetDBConnection()
+
+	fields := []string{}
+	values := []interface{}{}
+
+	if data.CdCnpjCpf != "" {
+		fields = append(fields, "cnpj = ? ")
+		values = append(values, data.CdCnpjCpf)
+	}
+
+	if err := db.Table("view_empresa").Where(strings.Join(fields, " AND "), values...).Find(&record).Error; err != nil {
+		log.Info("failure", []entity.Cnae{})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return result, 404, fmt.Errorf("Cnae not found")
+		}
+		return result, 400, fmt.Errorf("failed to get blog: %w", err)
+	}
+	if len(record) == 0 {
+		return result, 404, gorm.ErrRecordNotFound
+	}
+
+	return &dadosReceitaPb.ListResultCnpjEmpresaData{
+		Result: convertListCnpjEmpresaToProto(record),
+		Total:  int32(len(record)),
+	}, 200, nil
+
+}
+
 func structDataEmpresaToRes(data entity.Empresa) *dadosReceitaPb.EmpresaData {
 
 	d := &dadosReceitaPb.EmpresaData{
@@ -79,6 +110,45 @@ func structDataEmpresaToRes(data entity.Empresa) *dadosReceitaPb.EmpresaData {
 
 }
 
+func structDataCnpjEmpresaToRes(data entity.CNPJEmpresa) *dadosReceitaPb.CnpjEmpresaData {
+
+	d := &dadosReceitaPb.CnpjEmpresaData{
+		RazaoSocial:             data.RazaoSocial,
+		IdEmpresa:               data.IdEmpresa,
+		Subsidiaria:             data.Subsidiaria,
+		CodigoVerificador:       data.CodigoVerificador,
+		Cnpj:                    data.Cnpj,
+		MatrizFilial:            data.MatrizFilial,
+		Fantasia:                data.Fantasia,
+		SituacaoCadastral:       data.SituacaoCadastral,
+		DataSituacaoCadastral:   *data.DataSituacaoCadastral,
+		MotivoSituacaoCadastral: data.MotivoSituacaoCadastral,
+		DataAbertura:            *data.DataAbertura,
+		CnaePrincipal:           data.CnaePrincipal,
+		CnaeSecundaria:          data.CnaeSecundaria,
+		EnderecoTipoLogradouro:  data.EnderecoTipoLogradouro,
+		EnderecoLogradouro:      data.EnderecoLogradouro,
+		EnderecoNumero:          data.EnderecoNumero,
+		EnderecoComplemento:     data.EnderecoComplemento,
+		EnderecoBairro:          data.EnderecoBairro,
+		EnderecoCep:             data.EnderecoCep,
+		EnderecoUf:              data.EnderecoUf,
+		EnderecoCodigoMunicipio: data.EnderecoCodigoMunicipio,
+		Telefone1Ddd:            data.Telefone1Ddd,
+		Telefone1Numero:         data.Telefone1Numero,
+		Telefone2Ddd:            data.Telefone2Ddd,
+		Telefone2Numero:         data.Telefone2Numero,
+		FaxDdd:                  data.FaxDdd,
+		FaxNumero:               data.FaxNumero,
+		Email:                   data.Email,
+		Id:                      data.Id,
+		NomeMunicipio:           data.NomeMunicipio,
+	}
+
+	return d
+
+}
+
 func convertListEmpresaToProto(uD []entity.Empresa) []*dadosReceitaPb.EmpresaData {
 
 	var listRes []*dadosReceitaPb.EmpresaData
@@ -86,6 +156,20 @@ func convertListEmpresaToProto(uD []entity.Empresa) []*dadosReceitaPb.EmpresaDat
 	for _, d := range uD {
 
 		listRes = append(listRes, structDataEmpresaToRes(d))
+
+	}
+
+	return listRes
+
+}
+
+func convertListCnpjEmpresaToProto(uD []entity.CNPJEmpresa) []*dadosReceitaPb.CnpjEmpresaData {
+
+	var listRes []*dadosReceitaPb.CnpjEmpresaData
+
+	for _, d := range uD {
+
+		listRes = append(listRes, structDataCnpjEmpresaToRes(d))
 
 	}
 

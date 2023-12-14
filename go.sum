@@ -2,6 +2,8 @@ github.com/AverbachDev/grpc-nest-proto v0.0.0-20231207221803-97b7217857ec h1:p8t
 github.com/AverbachDev/grpc-nest-proto v0.0.0-20231207221803-97b7217857ec/go.mod h1:K9t6Ga8JbXi/g7PLtuLBOSKFl6btVfw02Y61iFF4RHM=
 github.com/AverbachDev/grpc-nest-proto v0.0.0-20231211193542-99bd80fa7033 h1:LwGSaKz1nSTbEQiDMITctIxAK8CmYedxTJHOpzIXdt8=
 github.com/AverbachDev/grpc-nest-proto v0.0.0-20231211193542-99bd80fa7033/go.mod h1:K9t6Ga8JbXi/g7PLtuLBOSKFl6btVfw02Y61iFF4RHM=
+github.com/AverbachDev/grpc-nest-proto v0.0.0-20231214165512-348a6039022a h1:BJ8oFySZ98MvOU0thjRjd1GaOIdb866xXN7Qz/lzWmQ=
+github.com/AverbachDev/grpc-nest-proto v0.0.0-20231214165512-348a6039022a/go.mod h1:K9t6Ga8JbXi/g7PLtuLBOSKFl6btVfw02Y61iFF4RHM=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=

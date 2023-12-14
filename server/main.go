@@ -49,16 +49,14 @@ func Start() {
 }
 
 // GetUser returns user message by user_id
-func (s *dadosReceitaServer) ProcessImport(ctx context.Context, req *dadosReceitaPb.WithoutParams) (*dadosReceitaPb.ServiceResponseListCnpjEmpresa, error) {
+func (s *dadosReceitaServer) ProcessImport(ctx context.Context, req *dadosReceitaPb.WithoutParams) (*dadosReceitaPb.ServiceResponseProcessImport, error) {
 
 	stepsImport()
 
-	data := &dadosReceitaPb.ListResultCnpjEmpresaData{}
-
-	return &dadosReceitaPb.ServiceResponseListCnpjEmpresa{
+	return &dadosReceitaPb.ServiceResponseProcessImport{
 		Status:  404,
 		Message: "",
-		Data:    data,
+		Data:    req,
 		Error:   "",
 	}, nil
 }
