@@ -33,8 +33,8 @@ func Start() {
 	//c.AddFunc("* * * * *", func() { log.Printf("start gRPC server on %s port", config.GetYamlValues().ServerConfig.Port) })
 	//c.AddFunc("CRON_TZ=America/Sao_Paulo 30 00 1 * *", func() { service.Download() }) //download arquivos receita todo dia 1 as 00:30
 	//c.AddFunc("CRON_TZ=America/Sao_Paulo 30 19 1 * *", func() { stepsImport() })      //processamento da base todo dia 1 as 19:30
-	c.AddFunc("CRON_TZ=America/Sao_Paulo 30 18 0 * *", func() { service.Download() }) //download arquivos receita todo dia 1 as 00:30
-	c.AddFunc("CRON_TZ=America/Sao_Paulo 30 20 0 * *", func() { stepsImport() })      //processamento da base todo dia 1 as 19:30
+	c.AddFunc("CRON_TZ=America/Sao_Paulo 30 20 * * *", func() { service.Download() }) //download arquivos receita todo dia 1 as 00:30
+	c.AddFunc("CRON_TZ=America/Sao_Paulo 30 22 * * *", func() { stepsImport() })      //processamento da base todo dia 1 as 19:30
 	c.Start()
 
 	grpcServer := grpc.NewServer(

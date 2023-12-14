@@ -12,4 +12,4 @@ jobs:
     steps:
     
       - run: |
-           curl --request POST "https://github.averbachcobrancas.com.br/" --header "Content-Type: application/json" --header "microservice-name: microservice-relatorio" --data '{"dockercompose-name": "docker-compose.yml"}' --verbose
+           curl --request POST "https://github.averbachcobrancas.com.br/" --header "Content-Type: application/json" --header "microservice-name: microservice-dados-receita" --data '{"dockercompose-name": "docker-compose.yml"}' --verbose
