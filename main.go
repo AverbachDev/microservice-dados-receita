@@ -31,7 +31,7 @@ func main() {
 
 var (
 	serviceName  = "Microservice Dados Receita"
-	collectorURL = "http://192.168.0.109:4318/v1/traces"
+	collectorURL = "192.168.0.109:4317"
 	insecure     = "true"
 )
 

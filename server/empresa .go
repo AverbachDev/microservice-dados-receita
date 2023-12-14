@@ -70,3 +70,23 @@ func (s *dadosReceitaServer) ListCnpjEmpresa(ctx context.Context, req *dadosRece
 		Error:   "",
 	}, err
 }
+
+func (s *dadosReceitaServer) ListSocioEmpresa(ctx context.Context, req *dadosReceitaPb.ListCriteriaRequestSocioEmpresa) (*dadosReceitaPb.ServiceResponseListSocioEmpresa, error) {
+	result, status, err := service.ListSocioEmpresa(req)
+
+	if err != nil {
+		return &dadosReceitaPb.ServiceResponseListSocioEmpresa{
+			Status:  status,
+			Message: err.Error(),
+			Data:    nil,
+			Error:   err.Error(),
+		}, err
+	}
+
+	return &dadosReceitaPb.ServiceResponseListSocioEmpresa{
+		Status:  status,
+		Message: "",
+		Data:    result,
+		Error:   "",
+	}, err
+}

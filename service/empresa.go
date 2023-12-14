@@ -95,6 +95,37 @@ func ListCnpjEmpresa(data *dadosReceitaPb.ListCriteriaRequestCnpjEmpresa) (*dado
 
 }
 
+func ListSocioEmpresa(data *dadosReceitaPb.ListCriteriaRequestSocioEmpresa) (*dadosReceitaPb.ListResultSocioEmpresaData, int32, error) {
+	var record []entity.SocioEmpresa
+	var result *dadosReceitaPb.ListResultSocioEmpresaData
+	db := dbService.GetDBConnection()
+
+	fields := []string{}
+	values := []interface{}{}
+
+	if data.IdEmpresa != "" {
+		fields = append(fields, "id_empresa = ? ")
+		values = append(values, data.IdEmpresa)
+	}
+
+	if err := db.Table("view_socio").Where(strings.Join(fields, " AND "), values...).Find(&record).Error; err != nil {
+		log.Info("failure", []entity.Cnae{})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return result, 404, fmt.Errorf("Cnae not found")
+		}
+		return result, 400, fmt.Errorf("failed to get blog: %w", err)
+	}
+	if len(record) == 0 {
+		return result, 404, gorm.ErrRecordNotFound
+	}
+
+	return &dadosReceitaPb.ListResultSocioEmpresaData{
+		Result: convertListSocioEmpresaToProto(record),
+		Total:  int32(len(record)),
+	}, 200, nil
+
+}
+
 func structDataEmpresaToRes(data entity.Empresa) *dadosReceitaPb.EmpresaData {
 
 	d := &dadosReceitaPb.EmpresaData{
@@ -149,6 +180,27 @@ func structDataCnpjEmpresaToRes(data entity.CNPJEmpresa) *dadosReceitaPb.CnpjEmp
 
 }
 
+func structDataSocioEmpresaToRes(data entity.SocioEmpresa) *dadosReceitaPb.SocioEmpresaData {
+
+	d := &dadosReceitaPb.SocioEmpresaData{
+		IdEmpresa:                data.IdEmpresa,
+		TipoPessoa:               data.TipoPessoa,
+		Nome:                     data.Nome,
+		CpfCnpj:                  data.CpfCnpj,
+		CodigoQualificacao:       data.CodigoQualificacao,
+		Data:                     *data.Data,
+		CpfRepresentanteLegal:    data.CpfRepresentanteLegal,
+		NomeRepresentanteLegal:   data.NomeRepresentanteLegal,
+		CodigoRepresentanteLegal: data.CodigoQualificacaoRepresentanteLegal,
+		Id:                       data.Id,
+		Codigo:                   data.Codigo,
+		Descricao:                data.Descricao,
+	}
+
+	return d
+
+}
+
 func convertListEmpresaToProto(uD []entity.Empresa) []*dadosReceitaPb.EmpresaData {
 
 	var listRes []*dadosReceitaPb.EmpresaData
@@ -170,6 +222,20 @@ func convertListCnpjEmpresaToProto(uD []entity.CNPJEmpresa) []*dadosReceitaPb.Cn
 	for _, d := range uD {
 
 		listRes = append(listRes, structDataCnpjEmpresaToRes(d))
+
+	}
+
+	return listRes
+
+}
+
+func convertListSocioEmpresaToProto(uD []entity.SocioEmpresa) []*dadosReceitaPb.SocioEmpresaData {
+
+	var listRes []*dadosReceitaPb.SocioEmpresaData
+
+	for _, d := range uD {
+
+		listRes = append(listRes, structDataSocioEmpresaToRes(d))
 
 	}
 
