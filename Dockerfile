@@ -5,7 +5,7 @@ ENV PATH="/go/bin:${PATH}"
 ENV TZ="America/Sao_Paulo"
 
 RUN apt-get update && \
-    apt-get install build-essential librdkafka-dev -y
+    apt-get install build-essential librdkafka-dev zip unzip -y
 
 COPY . .
 
