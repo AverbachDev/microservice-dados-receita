@@ -8,7 +8,7 @@ require (
 )
 
 require (
-	github.com/AverbachDev/grpc-nest-proto v0.0.0-20231214181628-fe520d6c0dde // indirect
+	github.com/AverbachDev/grpc-nest-proto v0.0.0-20231215170338-7b7def48fe1b // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
