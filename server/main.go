@@ -31,10 +31,10 @@ func Start() {
 
 	c := cron.New()
 	//c.AddFunc("* * * * *", func() { log.Printf("start gRPC server on %s port", config.GetYamlValues().ServerConfig.Port) })
-	//c.AddFunc("CRON_TZ=America/Sao_Paulo 30 00 1 * *", func() { service.Download() }) //download arquivos receita todo dia 1 as 00:30
-	//c.AddFunc("CRON_TZ=America/Sao_Paulo 30 19 1 * *", func() { stepsImport() })      //processamento da base todo dia 1 as 19:30
-	c.AddFunc("CRON_TZ=America/Sao_Paulo 00 17 * * *", func() { service.Download() }) //download arquivos receita todo dia 1 as 00:30
-	c.AddFunc("CRON_TZ=America/Sao_Paulo 30 21 * * *", func() { stepsImport() })      //processamento da base todo dia 1 as 19:30
+	c.AddFunc("CRON_TZ=America/Sao_Paulo 30 00 1 * *", func() { service.Download() }) //download arquivos receita todo dia 1 as 00:30
+	c.AddFunc("CRON_TZ=America/Sao_Paulo 30 19 1 * *", func() { stepsImport() })      //processamento da base todo dia 1 as 19:30
+	//c.AddFunc("CRON_TZ=America/Sao_Paulo 00 17 * * *", func() { service.Download() }) //download arquivos receita todo dia 1 as 00:30
+	//c.AddFunc("CRON_TZ=America/Sao_Paulo 30 21 * * *", func() { stepsImport() })      //processamento da base todo dia 1 as 19:30
 	c.Start()
 
 	grpcServer := grpc.NewServer(
@@ -71,7 +71,7 @@ func stepsImport() {
 	service.ProcessCSVNaturezaJuridica()
 	service.ProcessCSVPais()
 	service.ProcessCSVQualificacaoSocio()
-	go service.ProcessCSVEmpresa()
+	service.ProcessCSVEmpresa()
 	service.ProcessCSVSocio()
 	service.ProcessCSVEstabelecimento()
 	service.ProcessCSVOptanteSimples()
