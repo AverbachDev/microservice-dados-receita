@@ -181,7 +181,7 @@ func splitFile(fileName string, sizeSplit int) {
 			} else {
 				recordIndex := (recordsSplit * i) + j
 				if j == 0 {
-					fmt.Println(recordIndex)
+					fmt.Println(records[recordIndex])
 				}
 				csvwriter.Write(records[recordIndex])
 			}
@@ -189,11 +189,12 @@ func splitFile(fileName string, sizeSplit int) {
 		csvwriter.Flush()
 		csvFile.Close()
 		handleCSVEstabelecimento("data/output-extract/1" + fileName)
+		os.Remove("data/output-extract/" + strconv.Itoa(i) + fileName)
 		fmt.Println("processar o lote")
 	}
 
-	endLoopPosition := (recordsSplit) * (sizeSplit - 1)
-	if endLoopPosition <= len(records) {
+	endLoopPosition := (recordsSplit) * (sizeSplit)
+	if endLoopPosition < len(records) {
 		csvFile, err := os.Create("data/output-extract/" + strconv.Itoa(sizeSplit) + fileName)
 		if err != nil {
 			log.Fatalf("failed creating file: %s", err)
@@ -208,6 +209,8 @@ func splitFile(fileName string, sizeSplit int) {
 		csvwriter.Flush()
 		csvFile.Close()
 		handleCSVEstabelecimento("data/output-extract/1" + fileName)
+
+		os.Remove("data/output-extract/" + strconv.Itoa(sizeSplit) + fileName)
 
 		fmt.Println("processar o lote")
 	}
