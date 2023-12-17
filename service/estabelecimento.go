@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	dadosReceitaPb "github.com/AverbachDev/grpc-nest-proto/proto"
@@ -124,10 +125,93 @@ func ProcessCSVEstabelecimento() {
 	db.Exec("TRUNCATE estabelecimento;")
 	for _, e := range entries {
 		if strings.Index(e.Name(), "ESTABELE") > 0 {
-			handleCSVEstabelecimento(e.Name())
+
+			fi, err1 := os.Stat("data/output-extract/" + e.Name())
+			// get the size
+			if err1 != nil {
+				fmt.Println(err1)
+			}
+			if fi.Size() > 1185722158 {
+				sizeSplit := fi.Size() / 1185722158
+				splitFile(e.Name(), int(sizeSplit))
+			} else {
+				handleCSVEstabelecimento(e.Name())
+			}
 		}
 	}
 	db.Exec("OPTIMIZE TABLE estabelecimento;")
+}
+
+func splitFile(fileName string, sizeSplit int) {
+	file, err := os.Open("data/output-extract/" + fileName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer file.Close()
+
+	//reader := csv.NewReader(file)
+	reader := csv.NewReader(charmap.ISO8859_15.NewDecoder().Reader(file))
+
+	reader.Comma = ';'
+	records, err := reader.ReadAll()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	recordsSplit := len(records) / int(sizeSplit)
+
+	for i := 0; i < int(sizeSplit); i++ {
+		csvFile, err := os.Create("data/output-extract/" + strconv.Itoa(i) + fileName)
+		if err != nil {
+			log.Fatalf("failed creating file: %s", err)
+		}
+
+		csvwriter := csv.NewWriter(csvFile)
+		csvwriter.Comma = ';'
+		for j := 0; j < recordsSplit; j++ {
+			if i == 0 {
+				if j == 0 {
+					fmt.Println(records[j])
+				}
+				csvwriter.Write(records[j])
+			} else {
+				recordIndex := (recordsSplit * i) + j
+				if j == 0 {
+					fmt.Println(recordIndex)
+				}
+				csvwriter.Write(records[recordIndex])
+			}
+		}
+		csvwriter.Flush()
+		csvFile.Close()
+		handleCSVEstabelecimento("data/output-extract/1" + fileName)
+		fmt.Println("processar o lote")
+	}
+
+	endLoopPosition := (recordsSplit) * (sizeSplit - 1)
+	if endLoopPosition <= len(records) {
+		csvFile, err := os.Create("data/output-extract/" + strconv.Itoa(sizeSplit) + fileName)
+		if err != nil {
+			log.Fatalf("failed creating file: %s", err)
+		}
+
+		csvwriter := csv.NewWriter(csvFile)
+		csvwriter.Comma = ';'
+
+		for k := endLoopPosition; k < len(records); k++ {
+			csvwriter.Write(records[k])
+		}
+		csvwriter.Flush()
+		csvFile.Close()
+		handleCSVEstabelecimento("data/output-extract/1" + fileName)
+
+		fmt.Println("processar o lote")
+	}
+	records = nil
 }
 
 func handleCSVEstabelecimento(fileName string) {
