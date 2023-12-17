@@ -188,7 +188,7 @@ func splitFile(fileName string, sizeSplit int) {
 		}
 		csvwriter.Flush()
 		csvFile.Close()
-		handleCSVEstabelecimento("1" + fileName)
+		handleCSVEstabelecimento(strconv.Itoa(i) + fileName)
 		os.Remove("data/output-extract/" + strconv.Itoa(i) + fileName)
 		fmt.Println("processar o lote")
 	}
@@ -208,7 +208,7 @@ func splitFile(fileName string, sizeSplit int) {
 		}
 		csvwriter.Flush()
 		csvFile.Close()
-		handleCSVEstabelecimento("1" + fileName)
+		handleCSVEstabelecimento(strconv.Itoa(sizeSplit) + fileName)
 
 		os.Remove("data/output-extract/" + strconv.Itoa(sizeSplit) + fileName)
 
