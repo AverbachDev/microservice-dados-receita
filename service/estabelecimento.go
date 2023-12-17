@@ -240,6 +240,7 @@ func handleCSVEstabelecimento(fileName string) {
 
 	var estabelecimentoList []*entity.Estabelecimento
 
+	fmt.Println(records)
 	for _, eachline := range records {
 
 		matrizFilial := true
