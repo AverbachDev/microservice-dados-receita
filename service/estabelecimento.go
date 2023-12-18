@@ -240,7 +240,7 @@ func handleCSVEstabelecimento(fileName string) {
 
 	var estabelecimentoList []*entity.Estabelecimento
 
-	fmt.Println(records)
+	fmt.Println(len(records))
 	for _, eachline := range records {
 
 		matrizFilial := true
