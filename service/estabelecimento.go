@@ -124,7 +124,7 @@ func ProcessCSVEstabelecimento() {
 	db := dbService.GetDBConnection()
 	db.Exec("TRUNCATE estabelecimento;")
 	for _, e := range entries {
-		if strings.Index(e.Name(), "copy") > 0 {
+		if strings.Index(e.Name(), "ESTABELE") > 0 {
 
 			fi, err1 := os.Stat("data/output-extract/" + e.Name())
 			// get the size
@@ -280,16 +280,16 @@ func handleCSVEstabelecimento(fileName string) {
 		})
 	}
 
-	//reader = nil
+	reader = nil
 	db := dbService.GetDBConnection()
 
 	db.Table("estabelecimento").CreateInBatches(estabelecimentoList, 300)
-	//defer clearListEstabelecimento(estabelecimentoList)
+	defer clearListEstabelecimento(estabelecimentoList)
 
 }
 
-/*func clearListEstabelecimento(estabelecimentoList []*entity.Estabelecimento) {
+func clearListEstabelecimento(estabelecimentoList []*entity.Estabelecimento) {
 	if estabelecimentoList != nil {
 		estabelecimentoList = nil
 	}
-}*/
+}
