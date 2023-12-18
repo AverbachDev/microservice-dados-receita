@@ -124,7 +124,7 @@ func ProcessCSVEstabelecimento() {
 	db := dbService.GetDBConnection()
 	db.Exec("TRUNCATE estabelecimento;")
 	for _, e := range entries {
-		if strings.Index(e.Name(), "ESTABELE") > 0 {
+		if strings.Index(e.Name(), "copy") > 0 {
 
 			fi, err1 := os.Stat("data/output-extract/" + e.Name())
 			// get the size
