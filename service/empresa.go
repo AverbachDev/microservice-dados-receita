@@ -143,6 +143,12 @@ func structDataEmpresaToRes(data entity.Empresa) *dadosReceitaPb.EmpresaData {
 
 func structDataCnpjEmpresaToRes(data entity.CNPJEmpresa) *dadosReceitaPb.CnpjEmpresaData {
 
+	dataSituacaoCadastral := ""
+
+	if data.DataSituacaoCadastral != nil {
+		dataSituacaoCadastral = *data.DataSituacaoCadastral
+	}
+
 	d := &dadosReceitaPb.CnpjEmpresaData{
 		RazaoSocial:             data.RazaoSocial,
 		IdEmpresa:               data.IdEmpresa,
@@ -152,7 +158,7 @@ func structDataCnpjEmpresaToRes(data entity.CNPJEmpresa) *dadosReceitaPb.CnpjEmp
 		MatrizFilial:            data.MatrizFilial,
 		Fantasia:                data.Fantasia,
 		SituacaoCadastral:       data.SituacaoCadastral,
-		DataSituacaoCadastral:   *data.DataSituacaoCadastral,
+		DataSituacaoCadastral:   dataSituacaoCadastral,
 		MotivoSituacaoCadastral: data.MotivoSituacaoCadastral,
 		DataAbertura:            *data.DataAbertura,
 		CnaePrincipal:           data.CnaePrincipal,
