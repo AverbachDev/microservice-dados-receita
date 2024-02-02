@@ -132,7 +132,7 @@ func ProcessCSVEstabelecimento() {
 				fmt.Println(err1)
 			}
 			if fi.Size() > 600000000 {
-				sizeSplit := fi.Size() / 1185722158
+				sizeSplit := fi.Size() / 600000000
 				splitFile(e.Name(), int(sizeSplit))
 			} else {
 				handleCSVEstabelecimento(e.Name())
