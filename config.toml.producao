@@ -3,7 +3,7 @@ port="6013"
 debug=false
 
 [DATABASE]
-server="192.168.0.109"
+server="82.208.23.156"
 username="averbach"
 password="p4ssw@rd4vb!"
 port="3306"
