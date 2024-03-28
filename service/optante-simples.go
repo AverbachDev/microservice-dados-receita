@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -122,47 +123,36 @@ func handleCSVOptanteSimples(fileName string) {
 	defer file.Close()
 
 	reader := csv.NewReader(charmap.ISO8859_15.NewDecoder().Reader(file))
-
+	reader.ReuseRecord = true
 	reader.Comma = ';'
-	records, err := reader.ReadAll()
 
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	chunk := 1000000
-	loopTimes := len(records) / chunk
-
+	var optantesimplesList []*entity.OptanteSimples
 	db := dbService.GetDBConnection()
-
-	for i := 0; i < loopTimes; i++ {
-		initialPositionSlice := 0
-		endPositionSlice := chunk
-		if i > 0 {
-			initialPositionSlice = i * chunk
-			endPositionSlice = (i * chunk) + chunk
-			if endPositionSlice > len(records) {
-				endPositionSlice = len(records)
-			}
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			db.Table("optante_simples").CreateInBatches(optantesimplesList, 1000)
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		var optantesimplesList []*entity.OptanteSimples
-		for j := initialPositionSlice; j < endPositionSlice; j++ {
-			optantesimplesList = append(optantesimplesList, &entity.OptanteSimples{
-				IdEmpresa:     records[j][0],
-				Simples:       records[j][1],
-				SimplesInicio: utils.Parser_date(records[j][2]),
-				SimplesFim:    utils.Parser_date(records[j][3]),
-				Simei:         records[j][4],
-				SimeiInicio:   utils.Parser_date(records[j][5]),
-				SimeiFim:      utils.Parser_date(records[j][6]),
-			})
-		}
+		optantesimplesList = append(optantesimplesList, &entity.OptanteSimples{
+			IdEmpresa:     record[0],
+			Simples:       record[1],
+			SimplesInicio: utils.Parser_date(record[2]),
+			SimplesFim:    utils.Parser_date(record[3]),
+			Simei:         record[4],
+			SimeiInicio:   utils.Parser_date(record[5]),
+			SimeiFim:      utils.Parser_date(record[6]),
+		})
 
-		if err := db.Table("optante_simples").CreateInBatches(optantesimplesList, 1000).Error; err != nil {
-			panic(err)
+		if len(optantesimplesList) == 100000 {
+			db.Table("optante_simples").CreateInBatches(optantesimplesList, 1000)
+			optantesimplesList = optantesimplesList[:0] // slice with 0 length
 		}
-		log.Info("batch: ", initialPositionSlice)
 	}
+
+	file.Close()
 }
