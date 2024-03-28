@@ -4,8 +4,8 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"os"
-	"strconv"
 	"strings"
 
 	dadosReceitaPb "github.com/AverbachDev/grpc-nest-proto/proto"
@@ -121,6 +121,96 @@ func ProcessCSVEstabelecimento() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	db := dbService.GetDBConnection()
+	db.Exec("TRUNCATE estabelecimento;")
+
+	for _, e := range entries {
+		if strings.Index(e.Name(), "ESTABELE") > 0 {
+			file, err := os.Open("data/output-extract/" + e.Name())
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			//reader := csv.NewReader(file)
+			reader := csv.NewReader(charmap.ISO8859_15.NewDecoder().Reader(file))
+
+			reader.ReuseRecord = true
+
+			reader.Comma = ';'
+
+			var estabelecimentoList []*entity.Estabelecimento
+			for {
+				record, err := reader.Read()
+				if err == io.EOF {
+					db.Table("estabelecimento").CreateInBatches(estabelecimentoList, 300)
+					break
+				}
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				matrizFilial := true
+				if record[3] != "1" {
+					matrizFilial = false
+				}
+
+				estabelecimentoList = append(estabelecimentoList, &entity.Estabelecimento{
+					IdEmpresa:               record[0],
+					Subsidiaria:             record[1],
+					CodigoVerificador:       record[2],
+					Cnpj:                    record[0] + record[1] + record[2],
+					MatrizFilial:            matrizFilial,
+					Fantasia:                record[4],
+					SituacaoCadastral:       record[5],
+					DataSituacaoCadastral:   utils.Parser_date(record[6]),
+					MotivoSituacaoCadastral: record[7],
+					DataAbertura:            utils.Parser_date(record[10]),
+					CnaePrincipal:           utils.Parse_cnae(record[11]),
+					CnaeSecundaria:          utils.Parse_cnae(record[12]),
+					EnderecoTipoLogradouro:  record[13],
+					EnderecoLogradouro:      record[14],
+					EnderecoNumero:          record[15],
+					EnderecoComplemento:     record[16],
+					EnderecoBairro:          record[17],
+					EnderecoCep:             record[18],
+					EnderecoUf:              record[19],
+					EnderecoCodigoMunicipio: record[20],
+					Telefone1Ddd:            utils.Parse_ddd(record[21]),
+					Telefone1Numero:         record[22],
+					Telefone2Ddd:            utils.Parse_ddd(record[23]),
+					Telefone2Numero:         record[24],
+					FaxDdd:                  utils.Parse_ddd(record[25]),
+					FaxNumero:               record[26],
+					Email:                   record[27],
+					Id:                      0,
+				})
+
+				if len(estabelecimentoList) == 1000 {
+					db.Table("estabelecimento").CreateInBatches(estabelecimentoList, 250)
+					estabelecimentoList = estabelecimentoList[:0] // slice with 0 length
+				}
+
+			}
+
+			//records, err := reader.ReadAll()
+
+			file.Close()
+
+			reader = nil
+			db := dbService.GetDBConnection()
+
+			db.Table("estabelecimento").CreateInBatches(estabelecimentoList, 300)
+			defer clearListEstabelecimento(estabelecimentoList)
+
+		}
+	}
+
+	/*entries, err := os.ReadDir("data/output-extract/")
+	if err != nil {
+		log.Fatal(err)
+	}
 	db := dbService.GetDBConnection()
 	db.Exec("TRUNCATE estabelecimento;")
 	for _, e := range entries {
@@ -139,155 +229,156 @@ func ProcessCSVEstabelecimento() {
 			}
 		}
 	}
-	db.Exec("OPTIMIZE TABLE estabelecimento;")
+	db.Exec("OPTIMIZE TABLE estabelecimento;")*/
 }
 
-func splitFile(fileName string, sizeSplit int) {
-	file, err := os.Open("data/output-extract/" + fileName)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	defer file.Close()
-
-	//reader := csv.NewReader(file)
-	reader := csv.NewReader(charmap.ISO8859_15.NewDecoder().Reader(file))
-
-	reader.Comma = ';'
-	records, err := reader.ReadAll()
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	recordsSplit := len(records) / int(sizeSplit)
-
-	for i := 0; i < int(sizeSplit); i++ {
-		csvFile, err := os.Create("data/output-extract/" + strconv.Itoa(i) + fileName)
+/*
+	func splitFile(fileName string, sizeSplit int) {
+		file, err := os.Open("data/output-extract/" + fileName)
 		if err != nil {
-			log.Fatalf("failed creating file: %s", err)
+			fmt.Println(err)
+			return
 		}
 
-		csvwriter := csv.NewWriter(csvFile)
-		csvwriter.Comma = ';'
-		for j := 0; j < recordsSplit; j++ {
-			if i == 0 {
-				if j == 0 {
-					fmt.Println(records[j])
-				}
-				csvwriter.Write(records[j])
-			} else {
-				recordIndex := (recordsSplit * i) + j
-				if j == 0 {
-					fmt.Println(records[recordIndex])
-				}
-				csvwriter.Write(records[recordIndex])
+		defer file.Close()
+
+		//reader := csv.NewReader(file)
+		reader := csv.NewReader(charmap.ISO8859_15.NewDecoder().Reader(file))
+
+		reader.Comma = ';'
+		records, err := reader.ReadAll()
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		recordsSplit := len(records) / int(sizeSplit)
+
+		for i := 0; i < int(sizeSplit); i++ {
+			csvFile, err := os.Create("data/output-extract/" + strconv.Itoa(i) + fileName)
+			if err != nil {
+				log.Fatalf("failed creating file: %s", err)
 			}
+
+			csvwriter := csv.NewWriter(csvFile)
+			csvwriter.Comma = ';'
+			for j := 0; j < recordsSplit; j++ {
+				if i == 0 {
+					if j == 0 {
+						fmt.Println(records[j])
+					}
+					csvwriter.Write(records[j])
+				} else {
+					recordIndex := (recordsSplit * i) + j
+					if j == 0 {
+						fmt.Println(records[recordIndex])
+					}
+					csvwriter.Write(records[recordIndex])
+				}
+			}
+			csvwriter.Flush()
+			csvFile.Close()
+			handleCSVEstabelecimento(strconv.Itoa(i) + fileName)
+			os.Remove("data/output-extract/" + strconv.Itoa(i) + fileName)
+			fmt.Println("processar o lote")
 		}
-		csvwriter.Flush()
-		csvFile.Close()
-		handleCSVEstabelecimento(strconv.Itoa(i) + fileName)
-		os.Remove("data/output-extract/" + strconv.Itoa(i) + fileName)
-		fmt.Println("processar o lote")
+
+		endLoopPosition := (recordsSplit) * (sizeSplit)
+		if endLoopPosition < len(records) {
+			csvFile, err := os.Create("data/output-extract/" + strconv.Itoa(sizeSplit) + fileName)
+			if err != nil {
+				log.Fatalf("failed creating file: %s", err)
+			}
+
+			csvwriter := csv.NewWriter(csvFile)
+			csvwriter.Comma = ';'
+
+			for k := endLoopPosition; k < len(records); k++ {
+				csvwriter.Write(records[k])
+			}
+			csvwriter.Flush()
+			csvFile.Close()
+			handleCSVEstabelecimento(strconv.Itoa(sizeSplit) + fileName)
+
+			os.Remove("data/output-extract/" + strconv.Itoa(sizeSplit) + fileName)
+
+			fmt.Println("processar o lote")
+		}
+		records = nil
 	}
 
-	endLoopPosition := (recordsSplit) * (sizeSplit)
-	if endLoopPosition < len(records) {
-		csvFile, err := os.Create("data/output-extract/" + strconv.Itoa(sizeSplit) + fileName)
+	func handleCSVEstabelecimento(fileName string) {
+		//file, err := os.Open("data/output-extract/K3241.K03200Y9.D31111.ESTABELE")
+		file, err := os.Open("data/output-extract/" + fileName)
 		if err != nil {
-			log.Fatalf("failed creating file: %s", err)
+			fmt.Println(err)
+			return
 		}
 
-		csvwriter := csv.NewWriter(csvFile)
-		csvwriter.Comma = ';'
+		defer file.Close()
 
-		for k := endLoopPosition; k < len(records); k++ {
-			csvwriter.Write(records[k])
-		}
-		csvwriter.Flush()
-		csvFile.Close()
-		handleCSVEstabelecimento(strconv.Itoa(sizeSplit) + fileName)
+		//reader := csv.NewReader(file)
+		reader := csv.NewReader(charmap.ISO8859_15.NewDecoder().Reader(file))
 
-		os.Remove("data/output-extract/" + strconv.Itoa(sizeSplit) + fileName)
+		reader.Comma = ';'
+		records, err := reader.ReadAll()
 
-		fmt.Println("processar o lote")
-	}
-	records = nil
-}
-
-func handleCSVEstabelecimento(fileName string) {
-	//file, err := os.Open("data/output-extract/K3241.K03200Y9.D31111.ESTABELE")
-	file, err := os.Open("data/output-extract/" + fileName)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	defer file.Close()
-
-	//reader := csv.NewReader(file)
-	reader := csv.NewReader(charmap.ISO8859_15.NewDecoder().Reader(file))
-
-	reader.Comma = ';'
-	records, err := reader.ReadAll()
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	var estabelecimentoList []*entity.Estabelecimento
-
-	fmt.Println(len(records))
-	for _, eachline := range records {
-
-		matrizFilial := true
-		if eachline[3] != "1" {
-			matrizFilial = false
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
 
-		estabelecimentoList = append(estabelecimentoList, &entity.Estabelecimento{
-			IdEmpresa:               eachline[0],
-			Subsidiaria:             eachline[1],
-			CodigoVerificador:       eachline[2],
-			Cnpj:                    eachline[0] + eachline[1] + eachline[2],
-			MatrizFilial:            matrizFilial,
-			Fantasia:                eachline[4],
-			SituacaoCadastral:       eachline[5],
-			DataSituacaoCadastral:   utils.Parser_date(eachline[6]),
-			MotivoSituacaoCadastral: eachline[7],
-			DataAbertura:            utils.Parser_date(eachline[10]),
-			CnaePrincipal:           utils.Parse_cnae(eachline[11]),
-			CnaeSecundaria:          utils.Parse_cnae(eachline[12]),
-			EnderecoTipoLogradouro:  eachline[13],
-			EnderecoLogradouro:      eachline[14],
-			EnderecoNumero:          eachline[15],
-			EnderecoComplemento:     eachline[16],
-			EnderecoBairro:          eachline[17],
-			EnderecoCep:             eachline[18],
-			EnderecoUf:              eachline[19],
-			EnderecoCodigoMunicipio: eachline[20],
-			Telefone1Ddd:            utils.Parse_ddd(eachline[21]),
-			Telefone1Numero:         eachline[22],
-			Telefone2Ddd:            utils.Parse_ddd(eachline[23]),
-			Telefone2Numero:         eachline[24],
-			FaxDdd:                  utils.Parse_ddd(eachline[25]),
-			FaxNumero:               eachline[26],
-			Email:                   eachline[27],
-			Id:                      0,
-		})
-	}
+		var estabelecimentoList []*entity.Estabelecimento
 
-	reader = nil
-	db := dbService.GetDBConnection()
+		fmt.Println(len(records))
+		for _, eachline := range records {
 
-	db.Table("estabelecimento").CreateInBatches(estabelecimentoList, 300)
-	defer clearListEstabelecimento(estabelecimentoList)
+			matrizFilial := true
+			if eachline[3] != "1" {
+				matrizFilial = false
+			}
+
+			estabelecimentoList = append(estabelecimentoList, &entity.Estabelecimento{
+				IdEmpresa:               eachline[0],
+				Subsidiaria:             eachline[1],
+				CodigoVerificador:       eachline[2],
+				Cnpj:                    eachline[0] + eachline[1] + eachline[2],
+				MatrizFilial:            matrizFilial,
+				Fantasia:                eachline[4],
+				SituacaoCadastral:       eachline[5],
+				DataSituacaoCadastral:   utils.Parser_date(eachline[6]),
+				MotivoSituacaoCadastral: eachline[7],
+				DataAbertura:            utils.Parser_date(eachline[10]),
+				CnaePrincipal:           utils.Parse_cnae(eachline[11]),
+				CnaeSecundaria:          utils.Parse_cnae(eachline[12]),
+				EnderecoTipoLogradouro:  eachline[13],
+				EnderecoLogradouro:      eachline[14],
+				EnderecoNumero:          eachline[15],
+				EnderecoComplemento:     eachline[16],
+				EnderecoBairro:          eachline[17],
+				EnderecoCep:             eachline[18],
+				EnderecoUf:              eachline[19],
+				EnderecoCodigoMunicipio: eachline[20],
+				Telefone1Ddd:            utils.Parse_ddd(eachline[21]),
+				Telefone1Numero:         eachline[22],
+				Telefone2Ddd:            utils.Parse_ddd(eachline[23]),
+				Telefone2Numero:         eachline[24],
+				FaxDdd:                  utils.Parse_ddd(eachline[25]),
+				FaxNumero:               eachline[26],
+				Email:                   eachline[27],
+				Id:                      0,
+			})
+		}
+
+		reader = nil
+		db := dbService.GetDBConnection()
+
+		db.Table("estabelecimento").CreateInBatches(estabelecimentoList, 300)
+		defer clearListEstabelecimento(estabelecimentoList)
 
 }
-
+*/
 func clearListEstabelecimento(estabelecimentoList []*entity.Estabelecimento) {
 	if estabelecimentoList != nil {
 		estabelecimentoList = nil
