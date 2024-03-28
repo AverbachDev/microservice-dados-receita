@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -279,40 +280,41 @@ func handleCSVEmpresa(fileName string) {
 	reader := csv.NewReader(charmap.ISO8859_15.NewDecoder().Reader(file))
 
 	reader.Comma = ';'
-	records, err := reader.ReadAll()
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	reader.ReuseRecord = true
 
 	var empresaList []*entity.Empresa
+	db := dbService.GetDBConnection()
+	for {
+		record, err := reader.Read()
 
-	for _, eachline := range records {
+		if err == io.EOF {
+			db.Table("empresa").CreateInBatches(empresaList, 10000)
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		i, err := strconv.ParseInt(eachline[5], 10, 32)
+		i, err := strconv.ParseInt(record[5], 10, 32)
 		if err != nil {
 			i = 1
 		}
 
 		empresaList = append(empresaList, &entity.Empresa{
-			Id:                      eachline[0],
-			RazaoSocial:             eachline[1],
-			CodigoNaturezaJuridica:  eachline[2],
-			QualificacaoResponsavel: eachline[3],
-			CapitalSocial:           strings.Replace(eachline[4], ",", ".", -1),
+			Id:                      record[0],
+			RazaoSocial:             record[1],
+			CodigoNaturezaJuridica:  record[2],
+			QualificacaoResponsavel: record[3],
+			CapitalSocial:           strings.Replace(record[4], ",", ".", -1),
 			Porte:                   int32(i),
 		})
+
+		if len(empresaList) == 100000 {
+			db.Table("empresa").CreateInBatches(empresaList, 10000)
+			empresaList = empresaList[:0] // slice with 0 length
+		}
+
 	}
 
-	reader = nil
-	db := dbService.GetDBConnection()
-	db.Table("empresa").CreateInBatches(empresaList, 10000)
-	defer clearListEmpresa(empresaList)
-}
-
-func clearListEmpresa(empresaList []*entity.Empresa) {
-	if empresaList != nil {
-		empresaList = nil
-	}
+	file.Close()
 }

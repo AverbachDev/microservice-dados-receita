@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -127,47 +128,42 @@ func handleCSVSocio(fileName string) {
 	reader := csv.NewReader(charmap.ISO8859_15.NewDecoder().Reader(file))
 
 	reader.Comma = ';'
-	records, err := reader.ReadAll()
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	reader.ReuseRecord = true
 
 	var socioList []*entity.Socio
+	db := dbService.GetDBConnection()
+	for {
+		record, err := reader.Read()
 
-	for _, eachline := range records {
+		if err == io.EOF {
+			db.Table("socio").CreateInBatches(socioList, 300)
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		tipoPessoa := true
-		if eachline[3] != "1" {
+		if record[3] != "1" {
 			tipoPessoa = false
 		}
 		socioList = append(socioList, &entity.Socio{
-			IdEmpresa:                            eachline[0],
+			IdEmpresa:                            record[0],
 			TipoPessoa:                           tipoPessoa,
-			Nome:                                 eachline[2],
-			CpfCnpj:                              eachline[3],
-			CodigoQualificacao:                   eachline[4],
-			Data:                                 utils.Parser_date(eachline[5]),
-			CpfRepresentanteLegal:                eachline[7],
-			NomeRepresentanteLegal:               eachline[8],
-			CodigoQualificacaoRepresentanteLegal: eachline[9],
+			Nome:                                 record[2],
+			CpfCnpj:                              record[3],
+			CodigoQualificacao:                   record[4],
+			Data:                                 utils.Parser_date(record[5]),
+			CpfRepresentanteLegal:                record[7],
+			NomeRepresentanteLegal:               record[8],
+			CodigoQualificacaoRepresentanteLegal: record[9],
 			Id:                                   0,
 		})
+
+		if len(socioList) == 50000 {
+			db.Table("socio").CreateInBatches(socioList, 1000)
+			socioList = socioList[:0] // slice with 0 length
+		}
 	}
-
-	reader = nil
-	db := dbService.GetDBConnection()
-
-	db.Table("socio").CreateInBatches(socioList, 1000)
-
-	defer clearListSocio(socioList)
-
-}
-
-func clearListSocio(socioList []*entity.Socio) {
-	if socioList != nil {
-		socioList = nil
-	}
-
+	file.Close()
 }
