@@ -101,14 +101,14 @@ func (s *dadosReceitaServer) ProcessImport(ctx context.Context, req *dadosReceit
 }
 
 func stepsImport() {
-	/*service.ProcessCSVCnae()
+	service.ProcessCSVCnae()
 	service.ProcessCSVMotivoSituacaoCadastral()
 	service.ProcessCSVMunicipio()
 	service.ProcessCSVNaturezaJuridica()
 	service.ProcessCSVPais()
 	service.ProcessCSVQualificacaoSocio()
 	service.ProcessCSVEmpresa()
-	service.ProcessCSVSocio()*/
-	//service.ProcessCSVEstabelecimento()
-	//service.ProcessCSVOptanteSimples()
+	service.ProcessCSVSocio()
+	service.ProcessCSVEstabelecimento()
+	service.ProcessCSVOptanteSimples()
 }
