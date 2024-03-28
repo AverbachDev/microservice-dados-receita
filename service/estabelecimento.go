@@ -187,25 +187,18 @@ func ProcessCSVEstabelecimento() {
 					Id:                      0,
 				})
 
-				if len(estabelecimentoList) == 1000 {
+				if len(estabelecimentoList) == 50000 {
 					db.Table("estabelecimento").CreateInBatches(estabelecimentoList, 250)
 					estabelecimentoList = estabelecimentoList[:0] // slice with 0 length
 				}
 
 			}
 
-			//records, err := reader.ReadAll()
-
 			file.Close()
-
-			reader = nil
-			db := dbService.GetDBConnection()
-
-			db.Table("estabelecimento").CreateInBatches(estabelecimentoList, 300)
-			defer clearListEstabelecimento(estabelecimentoList)
-
 		}
 	}
+
+	db.Exec("OPTIMIZE TABLE estabelecimento;")
 
 	/*entries, err := os.ReadDir("data/output-extract/")
 	if err != nil {
